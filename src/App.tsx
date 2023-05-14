@@ -9,6 +9,10 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { produce } from 'immer';
+import { Collapse, Divider, IconButton, InputBase, List, ListItem } from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { TransitionGroup } from 'react-transition-group';
+import SendIcon from '@mui/icons-material/Send';
 
 function App() {
   const [idInstance, setIdInstance] = useState('1101819963');
@@ -18,6 +22,7 @@ function App() {
   const [phoneN, setPhoneN] = useState('');
   const [message, setMessage] = useState('');
   const [chats, setChats] = useState<string[]>([]);
+  const [activeChat, setActiveChat] = useState('');
 
   function sendMsg() {
     fetch(`https://api.green-api.com/waInstance${idInstance}/sendMessage/${apiToken}`, {
@@ -37,7 +42,7 @@ function App() {
   return (
     <div className={styles.app}>
       {/* <h1>Green API</h1> */}
-      <AppBar position='static'>
+      <AppBar position='static' sx={{ padding: '0 20px' }}>
         <Toolbar
         // variant='dense'
         >
@@ -74,8 +79,8 @@ function App() {
           />
         </Paper>
         <Box display={'flex'}>
-          <Paper sx={{ height: 'calc(100vh - 220px)', overflow: 'auto' }}>
-            <TextField
+          <Paper sx={{ minWidth: 310, height: 'calc(100vh - 220px)', overflow: 'auto' }}>
+            {/* <TextField
               // id='outlined-required'
               label='Номер телефона'
               value={phoneN}
@@ -90,17 +95,82 @@ function App() {
               }}
             >
               Создать чат
-            </Button>
-            <ul>
+            </Button> */}
+            <Paper
+              component='form'
+              elevation={3}
+              sx={{
+                p: '2px 4px',
+                mb: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                width: '300px',
+              }}
+              // onSubmit={(e) => addTask(e)}
+              onSubmit={(e) => {
+                e.preventDefault();
+                setChats((chats) => [phoneN, ...chats]);
+                setPhoneN('');
+              }}
+            >
+              <InputBase
+                id='input-task'
+                sx={{ ml: 1, flex: 1 }}
+                placeholder='номер телефона'
+                inputProps={{ 'aria-label': 'input task' }}
+                // value={newTask.taskText}
+                // onChange={(e) => {
+                //   setNewTask((task) => ({ ...task, taskText: e.target.value }));
+                // }}
+                value={phoneN}
+                onChange={(e) => {
+                  setPhoneN(e.target.value);
+                }}
+              />
+              <Divider sx={{ height: 28, m: 0.5 }} orientation='vertical' />
+              <IconButton
+                color='primary'
+                sx={{ p: '10px' }}
+                aria-label='directions'
+                type='submit'
+              >
+                <AddCircleOutlineIcon />
+              </IconButton>
+            </Paper>
+            {/* <ul>
               {chats.map((chat) => (
                 <li key={chat}>{chat}</li>
               ))}
-            </ul>
+            </ul> */}
+            <List sx={{ minWidth: 0 }}>
+              <TransitionGroup>
+                {chats.map((chat: string) => (
+                  <Collapse key={chat}>
+                    {/* <Task task={task} key={task.id} index={index} /> */}
+                    <ListItem
+                      key={chat}
+                      onClick={() => {
+                        setActiveChat(chat);
+                      }}
+                    >
+                      {chat}
+                    </ListItem>
+                  </Collapse>
+                ))}
+              </TransitionGroup>
+            </List>
           </Paper>
-          <Paper>
+          <Paper sx={{ width: '100%' }}>
+            <Paper sx={{ p: '8px 15px', mb: '2px' }} elevation={7}>
+              <Typography variant='h5' component='h4'>
+                Чат с {activeChat}
+              </Typography>
+            </Paper>
+            <Paper sx={{ height: '80%' }}>chat</Paper>
             <TextField
               id='standard-multiline-flexible'
-              label='Текст сообщения'
+              // label='Текст сообщения'
+              placeholder='Введите сообщение'
               multiline
               maxRows={10}
               value={message}
@@ -108,8 +178,15 @@ function App() {
                 setMessage(e.target.value);
               }}
             />
-            <Button variant='contained' onClick={sendMsg}>
+            {/* <Button variant='contained' onClick={sendMsg}>
               Отправить сообщение
+            </Button> */}
+            <Button
+              variant='contained'
+              // endIcon={<SendIcon />}
+              onClick={sendMsg}
+            >
+              <SendIcon />
             </Button>
           </Paper>
         </Box>
