@@ -13,6 +13,9 @@ import { Collapse, Divider, IconButton, InputBase, List, ListItem } from '@mui/m
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { TransitionGroup } from 'react-transition-group';
 import SendIcon from '@mui/icons-material/Send';
+import UpdateIcon from '@mui/icons-material/Update';
+
+export interface IChart {}
 
 function App() {
   const [idInstance, setIdInstance] = useState('1101819963');
@@ -29,7 +32,7 @@ function App() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chatId: `${phoneN}@c.us`,
+        chatId: `${activeChat}@c.us`,
         message,
       }),
       // redirect: 'follow',
@@ -37,6 +40,40 @@ function App() {
       .then((response) => response.text())
       .then((result) => console.log(result))
       .catch((error) => console.log('error', error));
+    setMessage('');
+  }
+
+  async function ReceiveNotification() {
+    const response = await fetch(
+      `https://api.green-api.com/waInstance${idInstance}/receiveNotification/${apiToken}`,
+      {
+        method: 'GET',
+        // redirect: 'follow',
+      }
+    );
+
+    const result = await response.json();
+    if (!result) {
+      console.log('нет входящих сообщений');
+      return;
+    }
+    console.log(result, result.body, result.body.idMessage, result.receiptId);
+
+    // .then((response) => response.json())
+    // .then((result) =>
+    //   console.log(result, result.body, result.body.idMessage, result.receiptId)
+    // )
+    // .catch((error) => console.log('error', error));
+
+    const response2 = await fetch(
+      `https://api.green-api.com/waInstance${idInstance}/deleteNotification/${apiToken}/${result.receiptId}`,
+      {
+        method: 'DELETE',
+        redirect: 'follow',
+      }
+    );
+    const result2 = await response2.json();
+    console.log(result2);
   }
 
   return (
@@ -160,34 +197,45 @@ function App() {
               </TransitionGroup>
             </List>
           </Paper>
-          <Paper sx={{ width: '100%' }}>
+          <Paper sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
             <Paper sx={{ p: '8px 15px', mb: '2px' }} elevation={7}>
               <Typography variant='h5' component='h4'>
                 Чат с {activeChat}
               </Typography>
+              <IconButton
+                color='primary'
+                aria-label='add to shopping cart'
+                onClick={ReceiveNotification}
+              >
+                <UpdateIcon />
+              </IconButton>
             </Paper>
-            <Paper sx={{ height: '80%' }}>chat</Paper>
-            <TextField
-              id='standard-multiline-flexible'
-              // label='Текст сообщения'
-              placeholder='Введите сообщение'
-              multiline
-              maxRows={10}
-              value={message}
-              onChange={(e) => {
-                setMessage(e.target.value);
-              }}
-            />
-            {/* <Button variant='contained' onClick={sendMsg}>
+            <Paper sx={{ height: '80%', flexGrow: 1 }}>chat</Paper>
+            <Box sx={{ display: 'flex', padding: '5px', backgroundColor: '#e8e8e8' }}>
+              <TextField
+                id='standard-multiline-flexible'
+                // label='Текст сообщения'
+                placeholder='Введите сообщение'
+                multiline
+                maxRows={10}
+                sx={{ flexGrow: 1, backgroundColor: 'white' }}
+                value={message}
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                }}
+              />
+              {/* <Button variant='contained' onClick={sendMsg}>
               Отправить сообщение
             </Button> */}
-            <Button
-              variant='contained'
-              // endIcon={<SendIcon />}
-              onClick={sendMsg}
-            >
-              <SendIcon />
-            </Button>
+              <Button
+                // variant='contained'
+                // endIcon={<SendIcon />}
+                sx={{ alignSelf: 'flex-end' }}
+                onClick={sendMsg}
+              >
+                <SendIcon />
+              </Button>
+            </Box>
           </Paper>
         </Box>
       </Box>
