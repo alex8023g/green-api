@@ -14,18 +14,42 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { TransitionGroup } from 'react-transition-group';
 import SendIcon from '@mui/icons-material/Send';
 import UpdateIcon from '@mui/icons-material/Update';
+import { create } from 'zustand';
+import { useChatStore } from './store';
 
-export interface IChart {}
+type TInOut = 'in' | 'out';
+
+interface IMsg {
+  textMessage: string;
+  inOut: TInOut;
+  timestamp: number;
+  idMessage: string;
+}
+
+interface IChat {
+  chatId: string;
+  phoneN: string;
+  msgs: IMsg[];
+}
 
 function App() {
-  const [idInstance, setIdInstance] = useState('1101819963');
+  const [idInstance, setIdInstance] = useState('1101820479');
   const [apiToken, setApiToken] = useState(
-    '882e9b55f6ef4d279e70a6e5a99b82b881515afc577e46cf8d'
+    '79be0c51b25848dbbdeb7d5e6a555b337addbd097c844ebea4'
   );
   const [phoneN, setPhoneN] = useState('');
   const [message, setMessage] = useState('');
-  const [chats, setChats] = useState<string[]>([]);
+  // const [chats, setChats] = useState<IChat[]>([
+  //   { chatId: '79100024677@c.us', phoneN: '79100024677', msgs: [] },
+  //   { chatId: '79660358555@c.us', phoneN: '79660358555', msgs: [] },
+  // ]);
   const [activeChat, setActiveChat] = useState('');
+  // const [chatMsgs, setChatMsgs] = useState<any[]>([]);
+
+  const chats = useChatStore((st) => st.chats);
+  const addChat = useChatStore((st) => st.addChat);
+  const addSentMsg = useChatStore((st) => st.addSentMsg);
+  const addReceivedMsg = useChatStore((st) => st.addReceivedMsg);
 
   function sendMsg() {
     fetch(`https://api.green-api.com/waInstance${idInstance}/sendMessage/${apiToken}`, {
@@ -37,43 +61,80 @@ function App() {
       }),
       // redirect: 'follow',
     })
-      .then((response) => response.text())
-      .then((result) => console.log(result))
+      .then((response) => response.json())
+      .then((result) => {
+        console.log(result);
+        console.log({
+          chatId: `${activeChat}@c.us`,
+          textMessage: message,
+          inOut: 'out',
+          timestamp: Date.now(),
+          idMessage: result.idMessage,
+        });
+        addSentMsg({
+          chatId: `${activeChat}@c.us`,
+          textMessage: message,
+          inOut: 'out',
+          timestamp: Date.now() / 1000,
+          idMessage: result.idMessage,
+        });
+      })
       .catch((error) => console.log('error', error));
     setMessage('');
   }
 
-  async function ReceiveNotification() {
-    const response = await fetch(
-      `https://api.green-api.com/waInstance${idInstance}/receiveNotification/${apiToken}`,
-      {
-        method: 'GET',
-        // redirect: 'follow',
-      }
-    );
+  async function ReceiveMsgs() {
+    let isPossibleMsg = true;
+    while (isPossibleMsg) {
+      const responseRec = await fetch(
+        `https://api.green-api.com/waInstance${idInstance}/receiveNotification/${apiToken}`,
+        {
+          method: 'GET',
+          // redirect: 'follow',
+        }
+      );
 
-    const result = await response.json();
-    if (!result) {
-      console.log('нет входящих сообщений');
-      return;
+      const resultRec = await responseRec.json();
+      if (!resultRec) {
+        console.log('нет входящих сообщений');
+        isPossibleMsg = false;
+        return;
+      }
+      console.log(
+        resultRec,
+        resultRec.body,
+        resultRec.body.idMessage,
+        resultRec.receiptId
+      );
+
+      if (resultRec.body.typeWebhook === 'incomingMessageReceived') {
+        addReceivedMsg({
+          chatId: resultRec.body.senderData.chatId,
+          textMessage: resultRec.body.messageData.textMessageData.textMessage,
+          inOut: 'in',
+          timestamp: resultRec.body.timestamp,
+          idMessage: resultRec.idMessage,
+        });
+      }
+
+      // setChatMsgs((chatMsg) => [...chatMsg, resultRec.body]);
+
+      // .then((response) => response.json())
+      // .then((result) =>
+      //   console.log(result, result.body, result.body.idMessage, result.receiptId)
+      // )
+      // .catch((error) => console.log('error', error));
+
+      const responseDel = await fetch(
+        `https://api.green-api.com/waInstance${idInstance}/deleteNotification/${apiToken}/${resultRec.receiptId}`,
+        {
+          method: 'DELETE',
+          redirect: 'follow',
+        }
+      );
+      const resultDel = await responseDel.json();
+      console.log(resultDel);
     }
-    console.log(result, result.body, result.body.idMessage, result.receiptId);
-
-    // .then((response) => response.json())
-    // .then((result) =>
-    //   console.log(result, result.body, result.body.idMessage, result.receiptId)
-    // )
-    // .catch((error) => console.log('error', error));
-
-    const response2 = await fetch(
-      `https://api.green-api.com/waInstance${idInstance}/deleteNotification/${apiToken}/${result.receiptId}`,
-      {
-        method: 'DELETE',
-        redirect: 'follow',
-      }
-    );
-    const result2 = await response2.json();
-    console.log(result2);
   }
 
   return (
@@ -143,10 +204,13 @@ function App() {
                 alignItems: 'center',
                 width: '300px',
               }}
-              // onSubmit={(e) => addTask(e)}
               onSubmit={(e) => {
                 e.preventDefault();
-                setChats((chats) => [phoneN, ...chats]);
+                // setChats((chats) => [
+                //   { chatId: `${phoneN}@c.us`, phoneN, msgs: [] },
+                //   ...chats,
+                // ]);
+                addChat(phoneN);
                 setPhoneN('');
               }}
             >
@@ -181,16 +245,16 @@ function App() {
             </ul> */}
             <List sx={{ minWidth: 0 }}>
               <TransitionGroup>
-                {chats.map((chat: string) => (
-                  <Collapse key={chat}>
+                {chats.map((chat) => (
+                  <Collapse key={chat.chatId}>
                     {/* <Task task={task} key={task.id} index={index} /> */}
                     <ListItem
-                      key={chat}
+                      key={chat.chatId}
                       onClick={() => {
-                        setActiveChat(chat);
+                        setActiveChat(chat.phoneN);
                       }}
                     >
-                      {chat}
+                      {chat.phoneN}
                     </ListItem>
                   </Collapse>
                 ))}
@@ -205,18 +269,52 @@ function App() {
               <IconButton
                 color='primary'
                 aria-label='add to shopping cart'
-                onClick={ReceiveNotification}
+                onClick={ReceiveMsgs}
               >
                 <UpdateIcon />
               </IconButton>
             </Paper>
-            <Paper sx={{ height: '80%', flexGrow: 1 }}>chat</Paper>
-            <Box sx={{ display: 'flex', padding: '5px', backgroundColor: '#e8e8e8' }}>
+            <Paper sx={{ height: '80%', flexGrow: 1 }}>
+              <List>
+                {chats
+                  .find((item) => item.phoneN === activeChat)
+                  ?.msgs.map((msgObj) => (
+                    <ListItem
+                      sx={msgObj.inOut === 'out' ? { justifyContent: 'end' } : {}}
+                    >
+                      <span
+                        style={
+                          msgObj.inOut === 'out'
+                            ? {
+                                padding: '5px',
+                                borderRadius: '7px',
+                                backgroundColor: '#b8e4ff',
+                              }
+                            : {
+                                padding: '5px',
+                                borderRadius: '7px',
+                                backgroundColor: '#bcf5bc',
+                              }
+                        }
+                      >
+                        {msgObj.textMessage}
+                      </span>
+                    </ListItem>
+                  ))}
+              </List>
+            </Paper>
+            <Box
+              component={'form'}
+              sx={{ display: 'flex', padding: '5px', backgroundColor: '#e8e8e8' }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                sendMsg();
+              }}
+            >
               <TextField
                 id='standard-multiline-flexible'
-                // label='Текст сообщения'
                 placeholder='Введите сообщение'
-                multiline
+                // multiline
                 maxRows={10}
                 sx={{ flexGrow: 1, backgroundColor: 'white' }}
                 value={message}
@@ -224,14 +322,12 @@ function App() {
                   setMessage(e.target.value);
                 }}
               />
-              {/* <Button variant='contained' onClick={sendMsg}>
-              Отправить сообщение
-            </Button> */}
               <Button
+                type='submit'
                 // variant='contained'
                 // endIcon={<SendIcon />}
                 sx={{ alignSelf: 'flex-end' }}
-                onClick={sendMsg}
+                // onClick={sendMsg}
               >
                 <SendIcon />
               </Button>
