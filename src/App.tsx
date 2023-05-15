@@ -153,7 +153,16 @@ function App() {
         </Toolbar>
       </AppBar>
       <Box paddingX={5}>
-        <Paper elevation={5} sx={{ marginY: 2, padding: 2, borderRadius: 2 }}>
+        <Paper
+          elevation={5}
+          sx={{
+            display: 'flex',
+            flexWrap: 'nowrap',
+            marginY: 2,
+            padding: 2,
+            borderRadius: 2,
+          }}
+        >
           <TextField
             required
             // id='outlined-required'
@@ -177,23 +186,9 @@ function App() {
           />
         </Paper>
         <Box display={'flex'}>
-          <Paper sx={{ minWidth: 310, height: 'calc(100vh - 220px)', overflow: 'auto' }}>
-            {/* <TextField
-              // id='outlined-required'
-              label='Номер телефона'
-              value={phoneN}
-              onChange={(e) => {
-                setPhoneN(e.target.value);
-              }}
-            />
-            <Button
-              variant='contained'
-              onClick={(e) => {
-                setChats((chats) => [...chats, phoneN]);
-              }}
-            >
-              Создать чат
-            </Button> */}
+          <Paper
+          // sx={{ minWidth: 310, height: 'calc(100vh - 220px)', overflow: 'auto' }}
+          >
             <Paper
               component='form'
               elevation={3}
@@ -243,7 +238,7 @@ function App() {
                 <li key={chat}>{chat}</li>
               ))}
             </ul> */}
-            <List sx={{ minWidth: 0 }}>
+            <List sx={{ minWidth: 310, height: 'calc(100vh - 280px)', overflow: 'auto' }}>
               <TransitionGroup>
                 {chats.map((chat) => (
                   <Collapse key={chat.chatId}>
@@ -262,8 +257,21 @@ function App() {
             </List>
           </Paper>
           <Paper sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-            <Paper sx={{ p: '8px 15px', mb: '2px' }} elevation={7}>
-              <Typography variant='h5' component='h4'>
+            <Paper
+              sx={{
+                display: 'flex',
+                flexWrap: 'nowrap',
+                alignItems: 'center',
+                p: '4px 15px',
+                mb: '2px',
+              }}
+              elevation={4}
+            >
+              <Typography
+                variant='h5'
+                component='h4'
+                sx={{ whiteSpace: 'nowrap', lineHeight: 1 }}
+              >
                 Чат с {activeChat}
               </Typography>
               <IconButton
@@ -274,7 +282,10 @@ function App() {
                 <UpdateIcon />
               </IconButton>
             </Paper>
-            <Paper sx={{ height: '80%', flexGrow: 1 }}>
+            <Paper
+              // sx={{ height: '80%', flexGrow: 1 }}
+              sx={{ minWidth: 310, height: 'calc(100vh - 300px)', overflow: 'auto' }}
+            >
               <List>
                 {chats
                   .find((item) => item.phoneN === activeChat)
