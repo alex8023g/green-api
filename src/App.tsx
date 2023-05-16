@@ -33,8 +33,8 @@ interface IChat {
 }
 
 function App() {
-  const [idInstance, setIdInstance] = useState(''); //1101820479
-  const [apiToken, setApiToken] = useState(''); // 79be0c51b25848dbbdeb7d5e6a555b337addbd097c844ebea4
+  // const [idInstance, setIdInstance] = useState(''); //1101820479
+  // const [apiToken, setApiToken] = useState(''); // 79be0c51b25848dbbdeb7d5e6a555b337addbd097c844ebea4
   const [phoneN, setPhoneN] = useState('');
   const [message, setMessage] = useState('');
   // const [chats, setChats] = useState<IChat[]>([
@@ -45,9 +45,13 @@ function App() {
   // const [chatMsgs, setChatMsgs] = useState<any[]>([]);
 
   const chats = useChatStore((st) => st.chats);
+  const idInstance = useChatStore((st) => st.idInstance);
+  const apiToken = useChatStore((st) => st.apiToken);
   const addChat = useChatStore((st) => st.addChat);
   const addSentMsg = useChatStore((st) => st.addSentMsg);
   const addReceivedMsg = useChatStore((st) => st.addReceivedMsg);
+  const addIdInstance = useChatStore((st) => st.addIdInstance);
+  const addApiToken = useChatStore((st) => st.addApiToken);
 
   function sendMsg() {
     fetch(`https://api.green-api.com/waInstance${idInstance}/sendMessage/${apiToken}`, {
@@ -167,7 +171,8 @@ function App() {
             label='IdInstance'
             value={idInstance}
             onChange={(e) => {
-              setIdInstance(e.target.value);
+              addIdInstance(e.target.value);
+              // setIdInstance(e.target.value);
             }}
             size='small'
           />
@@ -177,7 +182,8 @@ function App() {
             label='ApiTokenInstance'
             value={apiToken}
             onChange={(e) => {
-              setApiToken(e.target.value);
+              addApiToken(e.target.value);
+              // setApiToken(e.target.value);
             }}
             sx={{ width: 500 }}
             size='small'

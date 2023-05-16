@@ -25,11 +25,13 @@ interface IChat {
 
 interface ISrote {
   chats: IChat[];
-  // test: IMsg[];
+  idInstance: string;
+  apiToken: string;
   addChat: (phoneN: string) => void;
   addSentMsg: (msg: IMsg) => void;
   addReceivedMsg: (msg: IMsg) => void;
-  // addTest: (msg: IMsg) => void;
+  addIdInstance: (id: string) => void;
+  addApiToken: (token: string) => void;
 }
 
 export const useChatStore = create<ISrote>()(
@@ -37,7 +39,8 @@ export const useChatStore = create<ISrote>()(
     persist(
       (set) => ({
         chats: [],
-        // test: [],
+        idInstance: '',
+        apiToken: '',
         addChat: (phoneN: string) =>
           set((state) => ({
             chats: [...state.chats, { chatId: `${phoneN}@c.us`, phoneN, msgs: [] }],
@@ -64,10 +67,14 @@ export const useChatStore = create<ISrote>()(
                 : chat
             ),
           })),
-        // addTest: (msg: IMsg) =>
-        //   set((state) => ({
-        //     test: [...state.test, msg],
-        //   })),
+        addIdInstance: (id: string) =>
+          set((state) => ({
+            idInstance: id,
+          })),
+        addApiToken: (token: string) =>
+          set((state) => ({
+            apiToken: token,
+          })),
       }),
       {
         name: 'greenapi-storage',
