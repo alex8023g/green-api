@@ -33,10 +33,8 @@ interface IChat {
 }
 
 function App() {
-  const [idInstance, setIdInstance] = useState('1101820479');
-  const [apiToken, setApiToken] = useState(
-    '79be0c51b25848dbbdeb7d5e6a555b337addbd097c844ebea4'
-  );
+  const [idInstance, setIdInstance] = useState(''); //1101820479
+  const [apiToken, setApiToken] = useState(''); // 79be0c51b25848dbbdeb7d5e6a555b337addbd097c844ebea4
   const [phoneN, setPhoneN] = useState('');
   const [message, setMessage] = useState('');
   // const [chats, setChats] = useState<IChat[]>([
@@ -292,7 +290,18 @@ function App() {
                 component='h4'
                 sx={{ whiteSpace: 'nowrap', lineHeight: 1 }}
               >
-                Чат с {activeChat}
+                Чат с{' '}
+                {[
+                  activeChat.slice(0, 1),
+                  ' ',
+                  activeChat.slice(1, 4),
+                  ' ',
+                  activeChat.slice(4, 7),
+                  ' ',
+                  activeChat.slice(7, 9),
+                  ' ',
+                  activeChat.slice(9, 11),
+                ].join('')}
               </Typography>
               <IconButton
                 color='primary'
