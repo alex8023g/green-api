@@ -110,7 +110,7 @@ function App() {
       if (resultRec.body.typeWebhook === 'incomingMessageReceived') {
         addReceivedMsg({
           chatId: resultRec.body.senderData.chatId,
-          textMessage: resultRec.body.messageData.textMessageData.textMessage,
+          textMessage: resultRec.body.messageData.textMessageData?.textMessage,
           inOut: 'in',
           timestamp: resultRec.body.timestamp,
           idMessage: resultRec.idMessage,
