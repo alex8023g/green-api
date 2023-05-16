@@ -249,7 +249,26 @@ function App() {
                         setActiveChat(chat.phoneN);
                       }}
                     >
-                      {chat.phoneN}
+                      <Paper
+                        sx={
+                          activeChat === chat.phoneN
+                            ? { px: 5, py: 2, backgroundColor: '#03a9f4' }
+                            : { px: 5, py: 2 }
+                        }
+                      >
+                        {/* {chat.phoneN} */}
+                        {[
+                          chat.phoneN.slice(0, 1),
+                          ' ',
+                          chat.phoneN.slice(1, 4),
+                          ' ',
+                          chat.phoneN.slice(4, 7),
+                          ' ',
+                          chat.phoneN.slice(7, 9),
+                          ' ',
+                          chat.phoneN.slice(9, 11),
+                        ].join('')}
+                      </Paper>
                     </ListItem>
                   </Collapse>
                 ))}
@@ -261,6 +280,7 @@ function App() {
               sx={{
                 display: 'flex',
                 flexWrap: 'nowrap',
+                justifyContent: 'space-between',
                 alignItems: 'center',
                 p: '4px 15px',
                 mb: '2px',
