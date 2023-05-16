@@ -1,3 +1,10 @@
+# Инструкция для локального запуска проекта
+
+1. требуется установить глобально node.js https://nodejs.org/en
+2. склонировать репозиторий с github https://github.com/alex8023g/green-api
+3. запустить теримнал / консоль , перейти в папку проекта
+4. выполнить команду npm start
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
